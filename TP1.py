@@ -1,12 +1,11 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
 import numpy as np
 
 class YIQEditor:
     def __init__(self, root):
         self.root = root
-        self.root.title("Editor YIQ en tiempo real")
 
         # Variables
         self.img_original = None
@@ -20,37 +19,30 @@ class YIQEditor:
         # Lienzos para mostrar imágenes
         frame = tk.Frame(root)
         frame.pack()
-
+        #Titulos de Imagenes
         self.label_orig = tk.Label(frame, text="Imagen Original")
-        self.label_orig.grid(row=0, column=0)
-        self.label_proc = tk.Label(frame, text="Imagen Procesada")
-        self.label_proc.grid(row=0, column=1)
-
         self.canvas_orig = tk.Label(frame)
-        self.canvas_orig.grid(row=1, column=0, padx=10, pady=10)
+        self.label_proc = tk.Label(frame, text="Imagen Procesada")
         self.canvas_proc = tk.Label(frame)
-        self.canvas_proc.grid(row=1, column=1, padx=10, pady=10)
+        self.label_pixel = tk.Label(frame, text="Pixel procesado")
+        self.pixel_label = tk.Label(frame)
 
-        # Sliders independientes
+        # Modificadores de YIQ
         self.slider_Y = tk.Scale(root, from_=0.1, to=2.0, resolution=0.1,
-                                 orient="horizontal", label="Factor Y", command=self.actualizar)
+                                 orient="horizontal", label="Factor aY", command=self.actualizar)
         self.slider_Y.set(1.0)
-        self.slider_Y.pack(fill="x")
 
         self.slider_I = tk.Scale(root, from_=0.1, to=2.0, resolution=0.1,
-                                 orient="horizontal", label="Factor I", command=self.actualizar)
+                                 orient="horizontal", label="Factor bI", command=self.actualizar)
         self.slider_I.set(1.0)
-        self.slider_I.pack(fill="x")
 
         self.slider_Q = tk.Scale(root, from_=0.1, to=2.0, resolution=0.1,
-                                 orient="horizontal", label="Factor Q", command=self.actualizar)
+                                 orient="horizontal", label="Factor bQ", command=self.actualizar)
         self.slider_Q.set(1.0)
-        self.slider_Q.pack(fill="x")
 
         # Botón para guardar
         self.btn_guardar = tk.Button(root, text="Guardar Imagen",
                                      command=self.guardar_imagen, state="disabled")
-        self.btn_guardar.pack(pady=5)
 
     def cargar_imagen(self):
         archivo = filedialog.askopenfilename(filetypes=[("Imágenes", "*.jpg;*.png;*.jpeg")])
@@ -60,7 +52,21 @@ class YIQEditor:
             self.img_array = np.array(self.img_original, dtype=np.float32) / 255.0
 
             self.mostrar_imagen(self.img_original, self.canvas_orig)
+            self.btn_guardar.pack(pady=5)
+            # Mostrar sliders
+            self.slider_Y.pack(fill="x")
+            self.slider_I.pack(fill="x")
+            self.slider_Q.pack(fill="x")
+            # Mostrar Titulos
+            self.label_orig.grid(row=0, column=0)
+            self.canvas_orig.grid(row=1, column=0, padx=10, pady=10)
+            self.label_proc.grid(row=0, column=1)
+            self.canvas_proc.grid(row=1, column=1, padx=10, pady=10)
+            self.label_pixel.grid(row=0, column=2)
+            self.pixel_label.grid(row=1, column=2, padx=10, pady=10)
+
             self.actualizar()
+        
 
     def mostrar_imagen(self, img_pil, widget):
         img_tk = ImageTk.PhotoImage(img_pil)
@@ -103,6 +109,14 @@ class YIQEditor:
         # Mostrar
         self.mostrar_imagen(self.img_proc, self.canvas_proc)
 
+                # --- Convertir un pixel a bytes y graficarlo ---
+        pixel_bytes = tuple((np.array(self.img_proc)[0, 0]))  # primer pixel (0,0)
+        img_pixel = Image.new("RGB", (50, 50), pixel_bytes)
+        img_pixel_tk = ImageTk.PhotoImage(img_pixel)
+        self.pixel_label.config(image=img_pixel_tk)
+        self.pixel_label.image = img_pixel_tk
+
+
         # Activar guardar
         self.btn_guardar.config(state="normal")
 
@@ -114,8 +128,51 @@ class YIQEditor:
                 self.img_proc.save(archivo)
 
 
+class ScrollableFrame(ttk.Frame):
+    def __init__(self, container, *args, **kwargs):
+        super().__init__(container, *args, **kwargs)
+
+        # Canvas para el contenido
+        self.canvas = tk.Canvas(self)
+        v_scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        h_scrollbar = ttk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
+
+        # Frame interno que contendrá los widgets
+        self.scrollable_frame = ttk.Frame(self.canvas)
+
+        # Actualizar región de scroll cuando cambia el tamaño del frame
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+
+        # Meter el frame dentro del canvas
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+
+        # Configurar scrollbars
+        self.canvas.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
+
+        # Layout
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+        v_scrollbar.grid(row=0, column=1, sticky="ns")
+        h_scrollbar.grid(row=1, column=0, sticky="ew")
+
+        # Expandir el canvas
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+
 # Ejecutar
 if __name__ == "__main__":
     root = tk.Tk()
-    app = YIQEditor(root)
+    root.title("Editor RGB con YIQ ")
+
+    scrollable = ScrollableFrame(root)
+    scrollable.pack(fill="both", expand=True)
+
+    app = YIQEditor(scrollable.scrollable_frame)
+
     root.mainloop()
+
