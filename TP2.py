@@ -14,12 +14,12 @@ from mi_libreria import (
 class PixelApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Aritmética de Píxeles - según PDF")
+        self.root.title("Aritmética de Píxeles")
 
         # Variables para imágenes
         self.imgA = None
         self.imgB = None
-        self.result = None  # para guardar resultado
+        self.result = None  
 
         # ---- Frame superior: imágenes ----
         frame_imgs = tk.Frame(root)
@@ -80,7 +80,7 @@ class PixelApp:
         # Ocultar frame_ctrl al inicio
         self.frame_ctrl.pack_forget()
 
-    # ---- Funciones de carga ----
+    # Funciones de carga
     def cargar_A(self):
         archivo = filedialog.askopenfilename(filetypes=[("Imágenes", "*.jpg;*.png;*.bmp")])
         if archivo:
@@ -102,7 +102,7 @@ class PixelApp:
         if self.imgA is not None and self.imgB is not None:
             self.frame_ctrl.pack(pady=10)
 
-    # ---- Mostrar imagen en Tkinter ----
+    # Mostrar imagen
     def mostrar(self, arr, canvas):
         im = Image.fromarray(arr.astype(np.uint8))
         im.thumbnail((250, 250))
@@ -110,7 +110,7 @@ class PixelApp:
         canvas.config(image=imtk)
         canvas.image = imtk
 
-    # ---- Cambiar estado del combobox de modo ----
+    # Cambiar estado del desplegable
     def on_op_change(self, event=None):
         op = self.op_var.get()
         if op in ["Suma", "Resta"]:
@@ -121,7 +121,7 @@ class PixelApp:
             self.combo_mode.set("")
             self.combo_mode.config(state="disabled")
 
-    # ---- Aplicar operación seleccionada ----
+    # Aplicar operación seleccionada
     def aplicar_operacion(self):
         if self.imgA is None or self.imgB is None:
             return
@@ -174,7 +174,7 @@ class PixelApp:
             self.mostrar(result, self.canvas_res)
             self.btn_guardar.config(state="normal")  # habilitar guardar
 
-    # ---- Guardar resultado ----
+    # Guardar resultado
     def guardar_resultado(self):
         if self.result is None:
             return
@@ -183,7 +183,7 @@ class PixelApp:
         if archivo:
             Image.fromarray(self.result).save(archivo)
 
-# ---- Main ----
+# Main
 if __name__ == "__main__":
     root = tk.Tk()
     app = PixelApp(root)
