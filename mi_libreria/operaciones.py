@@ -50,7 +50,19 @@ def cociente(imgA, imgB):
 
 # Resta mediante valor absoluto (solo RGB?)
 
-import numpy as np
-
 def resta_abs(imgA, imgB):
     return np.abs(imgA.astype(np.int16) - imgB.astype(np.int16)).astype(np.uint8)
+
+# Comparar la luminosidad 
+
+def if_lighter(imgA, imgB):
+    YA = 0.299*imgA[:,:,0] + 0.587*imgA[:,:,1] + 0.114*imgA[:,:,2]
+    YB = 0.299*imgB[:,:,0] + 0.587*imgB[:,:,1] + 0.114*imgB[:,:,2]
+    mask = YA > YB
+    return np.where(mask[:,:,None], imgA, imgB)
+
+def if_darker(imgA, imgB):
+    YA = 0.299*imgA[:,:,0] + 0.587*imgA[:,:,1] + 0.114*imgA[:,:,2]
+    YB = 0.299*imgB[:,:,0] + 0.587*imgB[:,:,1] + 0.114*imgB[:,:,2]
+    mask = YA < YB
+    return np.where(mask[:,:,None], imgA, imgB)
