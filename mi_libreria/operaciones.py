@@ -1,6 +1,6 @@
 import numpy as np
 
-# Calculos basicos de RGB
+# Calculos basicos de RGB entre 2 imagenes
 
 def suma_rgb_clamp(imgA, imgB):
     return np.clip(imgA.astype(np.int16) + imgB.astype(np.int16), 0, 255).astype(np.uint8)
@@ -14,7 +14,7 @@ def resta_rgb_clamp(imgA, imgB):
 def resta_rgb_prom(imgA, imgB):
     return np.clip((imgA.astype(np.int16) - imgB.astype(np.int16)) / 2, 0, 255).astype(np.uint8)
 
-# Calculos basicos de YIQ
+# Calculos basicos de YIQ entre 2 imagenes
 
 def suma_yiq_clamp(yiqA, yiqB):
     Y = np.clip(yiqA[...,0] + yiqB[...,0], 0, 1)
@@ -67,8 +67,7 @@ def if_darker(imgA, imgB):
     mask = YA < YB
     return np.where(mask[:,:,None], imgA, imgB)
 
-
-from .conversion import rgb_to_yiq, yiq_to_rgb
+# Operaciones de luminancia
 
 def raiz(Y):
     return np.sqrt(Y)
