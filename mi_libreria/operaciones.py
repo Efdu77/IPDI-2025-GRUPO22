@@ -66,3 +66,22 @@ def if_darker(imgA, imgB):
     YB = 0.299*imgB[:,:,0] + 0.587*imgB[:,:,1] + 0.114*imgB[:,:,2]
     mask = YA < YB
     return np.where(mask[:,:,None], imgA, imgB)
+
+
+from .conversion import rgb_to_yiq, yiq_to_rgb
+
+def raiz(Y):
+    return np.sqrt(Y)
+
+def cuadrada(Y):
+    return np.power(Y, 2)
+
+def lineal_trozos(Y, Ymin=0.2, Ymax=0.8):
+    Yp = np.zeros_like(Y)
+    Yp[Y < Ymin] = 0
+    Yp[Y > Ymax] = 1
+    mask = (Y >= Ymin) & (Y <= Ymax)
+    Yp[mask] = (Y[mask] - Ymin) / (Ymax - Ymin)
+    return Yp
+
+
