@@ -19,3 +19,5 @@ from .operaciones import sobel_este, sobel_ne, sobel_no, sobel_norte, sobel_oest
 
 from .operaciones import pasaaltos_02, pasaaltos_04
 from .operaciones import pasabanda_02, pasabanda_04
+
+from .operaciones import apertura, cierre, borde_exterior, borde_interior, gradiente, mediana, erosion, dilatacion

@@ -239,3 +239,71 @@ def pasaaltos_04(img):
     k[g.shape[0]//2, g.shape[1]//2] = 1
     k = k - g
     return aplicar_kernel(img, k)
+
+# Morfologia
+
+import numpy as np
+from scipy.ndimage import median_filter
+
+def erosion(img):
+    """Erosión: toma el mínimo valor de la vecindad 3x3."""
+    if img.ndim == 3:
+        img = img.mean(axis=2)
+    img = img.astype(np.float32)
+    h, w = img.shape
+    res = np.zeros_like(img)
+    padded = np.pad(img, 1, mode='edge')
+
+    for i in range(h):
+        for j in range(w):
+            region = padded[i:i+3, j:j+3]
+            res[i, j] = np.min(region)
+    return res.astype(np.uint8)
+
+
+def dilatacion(img):
+    """Dilatación: toma el máximo valor de la vecindad 3x3."""
+    if img.ndim == 3:
+        img = img.mean(axis=2)
+    img = img.astype(np.float32)
+    h, w = img.shape
+    res = np.zeros_like(img)
+    padded = np.pad(img, 1, mode='edge')
+
+    for i in range(h):
+        for j in range(w):
+            region = padded[i:i+3, j:j+3]
+            res[i, j] = np.max(region)
+    return res.astype(np.uint8)
+
+
+def apertura(img):
+    """Apertura = Erosión seguida de Dilatación."""
+    return dilatacion(erosion(img))
+
+
+def cierre(img):
+    """Cierre = Dilatación seguida de Erosión."""
+    return erosion(dilatacion(img))
+
+
+def borde_exterior(img):
+    """Borde exterior = Dilatación - Original."""
+    return np.clip(dilatacion(img) - img, 0, 255).astype(np.uint8)
+
+
+def borde_interior(img):
+    """Borde interior = Original - Erosión."""
+    return np.clip(img - erosion(img), 0, 255).astype(np.uint8)
+
+
+def gradiente(img):
+    """Gradiente morfológico = Dilatación - Erosión."""
+    return np.clip(dilatacion(img) - erosion(img), 0, 255).astype(np.uint8)
+
+
+def mediana(img):
+    """Filtro de mediana (reduce ruido sin borrar bordes)."""
+    if img.ndim == 3:
+        img = img.mean(axis=2)
+    return median_filter(img, size=3).astype(np.uint8)
