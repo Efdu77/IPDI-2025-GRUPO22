@@ -72,23 +72,23 @@ class TP6:
         img = self.img_original.copy()
 
         if op == "Binarización 50%":
-            res = operaciones.binarizacion_50(img)
+            res = binarizacion_50(img)
         elif op == "Binarización Dos Modas":
-            res = operaciones.binarizacion_dos_modas(img)
+            res = binarizacion_dos_modas(img)
         elif op == "Binarización Otsu":
-            res = operaciones.binarizacion_otsu(img)
+            res = binarizacion_otsu(img)
         elif op == "Borde Laplaciano":
-            res = operaciones.borde_laplaciano(img)
+            res = borde_laplaciano(img)
         elif op == "Borde Morfológico":
-            res = operaciones.borde_morfologico(img)
+            res = borde_morfologico(img)
         elif op == "Marching Squares":
-            res = operaciones.borde_marching_squares(img)
+            res = borde_marching_squares(img)
         elif op == "Color Fill (Varita Mágica)":
             if self.seed is None:
                 messagebox.showinfo("Varita mágica", "Haz clic en la imagen para seleccionar el punto semilla.")
                 return
             x, y = self.seed
-            res = operaciones.color_fill(img, x, y, tolerancia=20)
+            res = color_fill(img, x, y, tolerancia=20)
             self.seed = None
         else:
             messagebox.showerror("Error", "Operación no reconocida.")
@@ -129,5 +129,5 @@ class TP6:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = TP5App(root)
+    app = TP6(root)
     root.mainloop()

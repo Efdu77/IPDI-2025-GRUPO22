@@ -18,4 +18,5 @@ from .operaciones import pasaaltos, pasabanda
 
 from .operaciones import apertura, cierre, borde_exterior, borde_interior, gradiente, mediana, erosion, dilatacion
 
-from .operaciones import binarizacion_50, binarizacion_dos_modas, binarizacion_otsu, borde_laplaciano, erosion, dilatacion, borde_morfologico, borde_marching_squares, color_fill
+from .operaciones import binarizacion_50, binarizacion_dos_modas, binarizacion_otsu
+from .operaciones import borde_laplaciano, erosion, dilatacion, borde_morfologico, borde_marching_squares, color_fill
