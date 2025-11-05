@@ -86,7 +86,6 @@ def lineal_trozos(Y, Ymin=0.2, Ymax=0.8):
 # Función base (convoluciones)
 
 def aplicar_kernel(imagen, kernel):
-    """Convolución 2D con cierre de bordes por repetición."""
     if imagen.ndim == 3:
         imagen = imagen.mean(axis=2)
     imagen = imagen.astype(np.float32)
@@ -109,11 +108,9 @@ def aplicar_kernel(imagen, kernel):
 # Pasabajos
 
 def pasabajo_plano(size=3):
-    """Filtro pasabajo plano (promedio)"""
     return np.ones((size, size)) / (size * size)
 
 def pasabajo_bartlett(size=3):
-    """Filtro pasabajo Bartlett (triangular) según PDF."""
     if size == 3:
         base = np.array([1, 2, 1])
     elif size == 5:
@@ -126,7 +123,6 @@ def pasabajo_bartlett(size=3):
     return kernel / np.sum(kernel)
 
 def pasabajo_gaussiano(size=5):
-    """Filtro pasabajo gaussiano discreto según PDF."""
     if size == 5:
         kernel = np.array([
             [1,  4,  7,  4, 1],
@@ -162,7 +158,6 @@ def laplaciano_v8():
                      [-1, -1, -1]])
 
 def sobel_orientacion(direccion):
-    """Sobel según orientación (1–8)."""
     if direccion == 1:
         return np.array([[-1, 0, 1],
                          [-2, 0, 2],
@@ -206,12 +201,10 @@ def filtro_identidad():
                      [0, 0, 0]])
 
 def pasaaltos(fc=0.2, tipo="v4"):
-    """Filtro pasaaltos = identidad - fc * Laplaciano"""
     lap = laplaciano_v4() if tipo == "v4" else laplaciano_v8()
     return filtro_identidad() - fc * lap
 
 def pasabanda(fc=0.2, tipo="v4"):
-    """Filtro pasabanda = identidad + fc * Laplaciano (según PDF TP4)."""
     lap = laplaciano_v4() if tipo == "v4" else laplaciano_v8()
     return filtro_identidad() + fc * lap
 
@@ -221,7 +214,6 @@ import numpy as np
 from scipy.ndimage import median_filter
 
 def erosion(img):
-    """Erosión: toma el mínimo valor de la vecindad 3x3."""
     if img.ndim == 3:
         img = img.mean(axis=2)
     img = img.astype(np.float32)
@@ -237,7 +229,6 @@ def erosion(img):
 
 
 def dilatacion(img):
-    """Dilatación: toma el máximo valor de la vecindad 3x3."""
     if img.ndim == 3:
         img = img.mean(axis=2)
     img = img.astype(np.float32)
@@ -253,32 +244,130 @@ def dilatacion(img):
 
 
 def apertura(img):
-    """Apertura = Erosión seguida de Dilatación."""
     return dilatacion(erosion(img))
 
 
 def cierre(img):
-    """Cierre = Dilatación seguida de Erosión."""
     return erosion(dilatacion(img))
 
 
 def borde_exterior(img):
-    """Borde exterior = Dilatación - Original."""
     return np.clip(dilatacion(img) - img, 0, 255).astype(np.uint8)
 
 
 def borde_interior(img):
-    """Borde interior = Original - Erosión."""
     return np.clip(img - erosion(img), 0, 255).astype(np.uint8)
 
 
 def gradiente(img):
-    """Gradiente morfológico = Dilatación - Erosión."""
     return np.clip(dilatacion(img) - erosion(img), 0, 255).astype(np.uint8)
 
 
 def mediana(img):
-    """Filtro de mediana (reduce ruido sin borrar bordes)."""
     if img.ndim == 3:
         img = img.mean(axis=2)
     return median_filter(img, size=3).astype(np.uint8)
+
+import cv2
+
+
+# Binarizaciones (?)
+
+def binarizacion_50(img):
+    umbral = np.median(img)
+    binaria = np.where(img > umbral, 255, 0)
+    return binaria.astype(np.uint8)
+
+
+def binarizacion_dos_modas(img):
+    hist, _ = np.histogram(img.ravel(), bins=256, range=(0, 256))
+    modas = np.argsort(hist)[-2:]
+    umbral = np.mean(modas)
+    binaria = np.where(img > umbral, 255, 0)
+    return binaria.astype(np.uint8)
+
+
+def binarizacion_otsu(img):
+    img_norm = (img - img.min()) / (img.max() - img.min())
+    img_scaled = (img_norm * 99).astype(int)
+
+    hist, _ = np.histogram(img_scaled.ravel(), bins=100, range=(0,100))
+    pixel_numb = img.shape[0] * img.shape[1]
+    prom_pond = 1 / pixel_numb
+    intensity = np.arange(100)
+
+    final_thresh = -1
+    final_value = -1
+
+    for x in range(1,100):
+        pcb = np.sum(hist[:x])
+        pcf = np.sum(hist[x:])
+        if pcb == 0 or pcf == 0:
+            continue
+        wb = pcb * prom_pond
+        wf = pcf * prom_pond
+
+        mub = np.sum(intensity[:x] * hist[:x]) / pcb
+        muf = np.sum(intensity[x:] * hist[x:]) / pcf
+
+        value = wb * wf * (mub - muf) ** 2
+        if value > final_value:
+            final_thresh = x / 100.0
+            final_value = value
+
+    img_bin = np.where(img_norm > final_thresh, 255, 0).astype(np.uint8)
+    return img_bin
+
+
+
+# Deteccion de bordes
+
+def borde_laplaciano(img):
+    lap = np.array([[0, -1, 0],
+                    [-1, 4, -1],
+                    [0, -1, 0]])
+    return aplicar_kernel(img, lap)
+
+def erosion(img):
+    h, w = img.shape
+    padded = np.pad(img, 1, mode='edge')
+    out = np.zeros_like(img)
+    for i in range(h):
+        for j in range(w):
+            region = padded[i:i+3, j:j+3]
+            out[i, j] = np.min(region)
+    return out
+
+def dilatacion(img):
+    h, w = img.shape
+    padded = np.pad(img, 1, mode='edge')
+    out = np.zeros_like(img)
+    for i in range(h):
+        for j in range(w):
+            region = padded[i:i+3, j:j+3]
+            out[i, j] = np.max(region)
+    return out
+
+def borde_morfologico(img):
+    return np.clip(dilatacion(img) - erosion(img), 0, 255).astype(np.uint8)
+
+def borde_marching_squares(img, nivel=128):
+    from skimage import measure
+    contornos = measure.find_contours(img, nivel)
+    resultado = np.zeros_like(img)
+    for c in contornos:
+        c = np.round(c).astype(int)
+        for y, x in c:
+            if 0 <= y < img.shape[0] and 0 <= x < img.shape[1]:
+                resultado[y, x] = 255
+    return resultado
+
+# Varita magica
+
+def color_fill(img, x, y, tolerancia=20):
+    img_copy = img.copy()
+    mask = np.zeros((img.shape[0]+2, img.shape[1]+2), np.uint8)
+    cv2.floodFill(img_copy, mask, (x, y), 255,
+                  (tolerancia,)*3, (tolerancia,)*3,
+                  flags=cv2.FLOODFILL_FIXED_RANGE)
+    return img_copy
