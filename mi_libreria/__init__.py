@@ -10,14 +10,10 @@ from .operaciones import if_lighter, if_darker
 
 from .operaciones import raiz, cuadrada, lineal_trozos
 
-from .operaciones import pasabajo_plano_3x3, pasabajo_plano_5x5, pasabajo_plano_7x7
-from .operaciones import pasabajo_bartlett_3x3, pasabajo_bartlett_5x5, pasabajo_bartlett_7x7
-from .operaciones import pasabajo_gaussiano_5x5, pasabajo_gaussiano_7x7
+from .operaciones import aplicar_kernel, pasabajo_bartlett, pasabajo_gaussiano, pasabajo_plano
 
-from .operaciones import laplaciano_v4, laplaciano_v8
-from .operaciones import sobel_este, sobel_ne, sobel_no, sobel_norte, sobel_oeste, sobel_se, sobel_so, sobel_sur
+from .operaciones import laplaciano_v4, laplaciano_v8, sobel_orientacion
 
-from .operaciones import pasaaltos_02, pasaaltos_04
-from .operaciones import pasabanda_02, pasabanda_04
+from .operaciones import pasaaltos, pasabanda
 
 from .operaciones import apertura, cierre, borde_exterior, borde_interior, gradiente, mediana, erosion, dilatacion

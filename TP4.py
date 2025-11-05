@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from PIL import Image, ImageTk
 import numpy as np
-from mi_libreria import pasabajo_plano_3x3, pasabajo_plano_5x5, pasabajo_plano_7x7, pasabajo_bartlett_3x3, pasabajo_bartlett_5x5, pasabajo_bartlett_7x7, pasabajo_gaussiano_5x5, pasabajo_gaussiano_7x7, laplaciano_v4, laplaciano_v8, sobel_este, sobel_ne, sobel_no, sobel_norte, sobel_oeste, sobel_se, sobel_so, sobel_sur, pasabanda_02, pasabanda_04, pasaaltos_02, pasaaltos_04
+from mi_libreria import aplicar_kernel, pasabajo_plano, pasabajo_bartlett, pasabajo_gaussiano, laplaciano_v4, laplaciano_v8, sobel_orientacion, pasaaltos,pasabanda
 
 class TP4App:
     def __init__(self, root):
@@ -157,6 +157,62 @@ class TP4App:
             return
         self.img_resultado.save(path)
         messagebox.showinfo("Guardado", "Imagen filtrada guardada correctamente.")
+
+        # === Adaptadores para TP4 (usa las funciones existentes) ===
+
+def pasabajo_plano_3x3(img):
+    return aplicar_kernel(img, pasabajo_plano(3))
+
+def pasabajo_plano_5x5(img):
+    return aplicar_kernel(img, pasabajo_plano(5))
+
+def pasabajo_plano_7x7(img):
+    return aplicar_kernel(img, pasabajo_plano(7))
+
+def pasabajo_bartlett_3x3(img):
+    return aplicar_kernel(img, pasabajo_bartlett(3))
+
+def pasabajo_bartlett_5x5(img):
+    return aplicar_kernel(img, pasabajo_bartlett(5))
+
+def pasabajo_bartlett_7x7(img):
+    return aplicar_kernel(img, pasabajo_bartlett(7))
+
+def pasabajo_gaussiano_5x5(img):
+    return aplicar_kernel(img, pasabajo_gaussiano(5))
+
+def pasabajo_gaussiano_7x7(img):
+    return aplicar_kernel(img, pasabajo_gaussiano(7))
+
+def laplaciano_v4(img):
+    return aplicar_kernel(img, laplaciano_v4())
+
+def laplaciano_v8(img):
+    return aplicar_kernel(img, laplaciano_v8())
+
+# Sobel 8 orientaciones
+def sobel_norte(img): return aplicar_kernel(img, sobel_orientacion(3))
+def sobel_sur(img):   return aplicar_kernel(img, sobel_orientacion(7))
+def sobel_este(img):  return aplicar_kernel(img, sobel_orientacion(1))
+def sobel_oeste(img): return aplicar_kernel(img, sobel_orientacion(5))
+def sobel_ne(img):    return aplicar_kernel(img, sobel_orientacion(2))
+def sobel_no(img):    return aplicar_kernel(img, sobel_orientacion(8))
+def sobel_se(img):    return aplicar_kernel(img, sobel_orientacion(6))
+def sobel_so(img):    return aplicar_kernel(img, sobel_orientacion(4))
+
+# Pasabanda y pasaaltos con FC 0.2 / 0.4
+def pasabanda_02(img):
+    return aplicar_kernel(img, pasabanda(0.2))
+
+def pasabanda_04(img):
+    return aplicar_kernel(img, pasabanda(0.4))
+
+def pasaaltos_02(img):
+    return aplicar_kernel(img, pasaaltos(0.2))
+
+def pasaaltos_04(img):
+    return aplicar_kernel(img, pasaaltos(0.4))
+
 
 if __name__ == "__main__":
     root = tk.Tk()
